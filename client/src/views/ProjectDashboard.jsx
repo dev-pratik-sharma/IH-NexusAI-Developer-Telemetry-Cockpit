@@ -40,7 +40,7 @@ const ProjectDashboard = () => {
     setIsDeletingProject(true);
     try {
       const token = localStorage.getItem('nexus_token');
-      const response = await fetch(`http://localhost:5000/api/projects/${projectToDelete.id}`, {
+      const response = await fetch(`https://ih-nexusai-developer-telemetry-cockpit.onrender.com/api/projects/${projectToDelete.id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -78,7 +78,7 @@ const ProjectDashboard = () => {
     setSummary('');
     try {
       const token = localStorage.getItem('nexus_token');
-      const response = await fetch('http://localhost:5000/api/ai/summarize', {
+      const response = await fetch('https://ih-nexusai-developer-telemetry-cockpit.onrender.com/api/ai/summarize', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }
       });
