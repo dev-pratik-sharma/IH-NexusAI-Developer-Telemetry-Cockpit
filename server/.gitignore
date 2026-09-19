@@ -1,0 +1,13 @@
+# Node package modules
+node_modules/
+
+# Private environmental cluster credentials database variables
+.env
+
+# System execution log logs
+logs/
+*.log
+npm-debug.log*
+
+# Temporary cache files
+.cache/
