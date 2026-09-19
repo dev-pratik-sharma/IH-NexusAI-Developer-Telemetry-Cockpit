@@ -21,7 +21,7 @@ const MockAI = () => {
     setSummary('');
     try {
       const token = localStorage.getItem('nexus_token');
-      const response = await fetch('http://localhost:5000/api/ai/summarize', {
+      const response = await fetch('https://ih-nexusai-developer-telemetry-cockpit.onrender.com/api/ai/summarize', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
