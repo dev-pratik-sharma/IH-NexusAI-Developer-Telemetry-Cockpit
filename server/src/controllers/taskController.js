@@ -6,7 +6,7 @@ exports.getAllTasks = async (req, res) => {
     const tasks = await Task.findAll({
       include: {
         model: Project,
-        where: { user_id: req.userId }, // FIXED: Enforces correct lowercase relational matching
+        where: { user_id: req.userId }, 
         attributes: [] 
       }
     });
@@ -25,13 +25,12 @@ exports.createTask = async (req, res) => {
       return res.status(400).json({ error: 'Validation Error', message: 'Task title and ProjectId are mandatory.' });
     }
 
-    // Verify parent project exists AND belongs to the requesting user
-    const parentProject = await Project.findOne({ where: { id: ProjectId, user_id: req.userId } }); // FIXED: user_id check
+    const parentProject = await Project.findOne({ where: { id: ProjectId, user_id: req.userId } }); 
     if (!parentProject) {
       return res.status(404).json({ error: 'Access Denied', message: 'Target project container does not exist or is unauthorized.' });
     }
 
-    const newTask = await Task.create({ title, status, priority, project_id: ProjectId }); // FIXED: project_id definition
+    const newTask = await Task.create({ title, status, priority, project_id: ProjectId, ProjectId: ProjectId }); 
     res.status(201).json(newTask);
   } catch (error) {
     res.status(500).json({ error: 'Failed to initialize task entity', message: error.message });
@@ -44,12 +43,16 @@ exports.updateTask = async (req, res) => {
     const { id } = req.params;
     const { title, status, priority } = req.body;
 
-    const task = await Task.findByPk(id, {
-      include: { model: Project, where: { user_id: req.userId } } // FIXED: user_id parameter check
-    });
-
+    const task = await Task.findByPk(id);
     if (!task) {
-      return res.status(404).json({ error: 'Access Denied', message: 'Target task node does not exist or unauthorized.' });
+      return res.status(404).json({ error: 'Not Found', message: 'Target task node does not exist.' });
+    }
+
+    // Double check project ownership separately to avoid inner-join failures
+    const targetProjId = task.project_id || task.ProjectId;
+    const project = await Project.findOne({ where: { id: targetProjId, user_id: req.userId } });
+    if (!project) {
+      return res.status(401).json({ error: 'Access Denied', message: 'Unauthorized task modification.' });
     }
 
     if (title !== undefined) task.title = title;
@@ -63,36 +66,49 @@ exports.updateTask = async (req, res) => {
   }
 };
 
-// ==========================================================
-// 🌌 REPAIRED: HIGH-PERFORMANCE BACKEND DELETION Emitter
-// ==========================================================
+// =================================================================
+// 🌌 REPAIRED & BULLETPROOFED: BULK STABLE TASK PURGER EXECUTOR
+// =================================================================
 exports.deleteTask = async (req, res) => {
   try {
-    // FIXED: Bulletproof fallback capture matches either destructuring or explicit parameter lines
-    const targetId = req.params.id || req.params.Id;
+    const targetId = req.params.id;
 
     if (!targetId) {
-      return res.status(400).json({ error: 'Validation Error', message: 'Task primary index parameter missing.' });
+      return res.status(400).json({ error: 'Validation Error', message: 'Task unique identifier parameter missing.' });
     }
 
-    // Direct look-up prevents nested join stalling bugs over cloud PostgreSQL layers
+    // Step 1: Locate the target task row directly first
     const task = await Task.findByPk(targetId);
 
     if (!task) {
-      return res.status(404).json({ error: 'Not Discovered', message: 'Target task entity does not exist or has already been cleared.' });
+      return res.status(404).json({ error: 'Not Discovered', message: 'Task record does not exist or has already been cleared.' });
     }
 
-    // Execute database rows extraction flush
+    // Step 2: Extract project references safely to check ownership without failing on join structures
+    const associatedProjectId = task.project_id || task.ProjectId;
+    
+    if (associatedProjectId) {
+      const parentProjectOwnershipCheck = await Project.findOne({
+        where: { id: associatedProjectId, user_id: req.userId }
+      });
+
+      // If the project doesn't belong to the logged-in user, block deletion
+      if (!parentProjectOwnershipCheck) {
+        return res.status(403).json({ error: 'Access Denied', message: 'Clearance verification failure: Unauthorized resource access.' });
+      }
+    }
+
+    // Step 3: All checks pass safely -> execute permanent record destruction
     await task.destroy();
     
-    // Explicit production json confirmation closes out the network socket loop instantly!
+    // Express returns explicit JSON success message instantly, releasing frontend loaders
     return res.status(200).json({ 
       success: true, 
       message: 'Operational task cleared from sequence layout perfectly.' 
     });
 
   } catch (error) {
-    console.error("Task destruction engine failure:", error);
+    console.error("Critical Task destruction engine failure:", error);
     return res.status(500).json({ error: 'Failed to destroy task record', message: error.message });
   }
 };
