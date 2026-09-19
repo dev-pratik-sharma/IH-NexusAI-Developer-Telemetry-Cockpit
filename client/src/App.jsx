@@ -53,8 +53,7 @@ const AppContent = () => {
     return () => window.removeEventListener('popstate', handlePopState);
   }, [isLoggedIn, setShowLogoutModal]);
 
-  // 🌌 NEW: HIGH-TECH INITIALIZATION GATEWAY PROTECTION LOCK
-  // This intercepts reloads to show a fullscreen loader, completely preventing white screen crashes
+  // 🌌 HIGH-TECH INITIALIZATION GATEWAY PROTECTION LOCK
   if (isLoading && !isLoggedIn) {
     return (
       <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#060913] backdrop-blur-md">
@@ -80,8 +79,15 @@ const AppContent = () => {
 
   return (
     <div className="flex flex-col lg:flex-row min-h-screen w-full font-sans antialiased bg-transparent selection:bg-indigo-500/30 selection:text-white overflow-x-hidden relative">
+      
+      {/* 1. Left Navigation Core Fixed Sidebar Tray */}
       <Sidebar />
-      <MainContent />
+      
+      {/* 2. Main Right-Hand Dashboards Window Panel */}
+      {/* FIXED: Enforced a rock-solid 'lg:pl-64' left margin buffer so dashboard tiles never hide behind the sidebar */}
+      <div className="flex-1 flex flex-col min-w-0 h-full pb-24 lg:pb-0 lg:pl-64 pt-4 lg:pt-0">
+        <MainContent />
+      </div>
 
       {/* 🌌 RUNTIME BACKGROUND BACKDROP LOADER: Fires smoothly when refreshing individual data segments */}
       {isLoading && (
