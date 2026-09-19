@@ -17,7 +17,7 @@ const Sidebar = () => {
 
   return (
     // 🌌 FIXED LAYOUT: Swapped 'lg:sticky lg:top-0' out for 'lg:fixed lg:inset-y-0 lg:left-0' to keep the panel locked
-    <aside className="fixed bottom-0 left-0 z-40 h-17.5 w-full glass-sidebar lg:fixed lg:inset-y-0 lg:left-0 lg:h-screen lg:w-64 flex lg:flex-col justify-between p-4 border-t lg:border-t-0 border-slate-800 transition-all duration-300">
+    <aside className="fixed bottom-0 left-0 z-40 h-17.5 w-full bg-[#070b14] opacity-10 border-t lg:fixed lg:inset-y-0 lg:left-0 lg:h-screen lg:w-64 flex lg:flex-col justify-between p-4 lg:border-t-0 lg:border-r border-white/5 transition-all duration-300 shadow-2xl">
       
       <div className="hidden lg:flex items-center gap-3 px-2 py-3 border-b border-white/5 mb-6 cursor-pointer" onClick={() => navigate('/dashboard')}>
         <div className="p-2 bg-indigo-500/20 border border-indigo-500/30 rounded-xl text-indigo-400">
