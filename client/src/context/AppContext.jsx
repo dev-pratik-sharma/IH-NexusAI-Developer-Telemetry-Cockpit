@@ -192,6 +192,26 @@ export const AppProvider = ({ children }) => {
     }
   };
 
+  const deleteExistingTask = async (taskId) => {
+    const response = await fetch(`${API_BASE}/tasks/${taskId}`, {
+      method: 'DELETE',
+      headers: getAuthHeaders()
+    });
+
+    if (!response.ok) {
+      let message = 'Failed to delete task';
+      try {
+        const data = await response.json();
+        message = data.message || data.error || message;
+      } catch (_) {
+        // response wasn't JSON, ignore
+      }
+      throw new Error(message);
+    }
+
+    await fetchDatabaseData();
+  };
+
   const handleLogout = () => {
     localStorage.removeItem('nexus_token');
     setIsLoggedIn(false);
@@ -213,7 +233,8 @@ export const AppProvider = ({ children }) => {
       isLoggedIn, setIsLoggedIn,
       userProfile, setUserProfile,
       projects, tasks, isLoading,
-      addNewProject, addNewTask, toggleTaskStatus, handleLogout, fetchDatabaseData
+      addNewProject, addNewTask, toggleTaskStatus, handleLogout, fetchDatabaseData,
+      deleteExistingTask
     }}>
       {children}
     </AppContext.Provider>
