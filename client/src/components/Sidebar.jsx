@@ -4,7 +4,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { LayoutDashboard, Sparkles, Terminal, LogOut } from 'lucide-react';
 
 const Sidebar = () => {
-  const { userProfile, setShowLogoutModal } = useApp(); // FIXED: Explicitly extracted
+  const { userProfile, setShowLogoutModal } = useApp();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -16,7 +16,8 @@ const Sidebar = () => {
   const userInitial = userProfile.name ? userProfile.name.charAt(0) : 'D';
 
   return (
-    // 🌌 FIXED LAYOUT: Swapped 'lg:sticky lg:top-0' out for 'lg:fixed lg:inset-y-0 lg:left-0' to keep the panel locked
+    // 🌌 FIXED & OPACITY HARDENED: Changed background to a high-contrast solid cyber ink color (#070b14)
+    // Removed transparent glass utilities to ensure zero scrolling text bleed-through!
     <aside className="fixed bottom-0 left-0 z-40 h-17.5 w-full bg-[#070b14] border-t lg:fixed lg:inset-y-0 lg:left-0 lg:h-screen lg:w-64 flex lg:flex-col justify-between p-4 lg:border-t-0 lg:border-r border-white/5 transition-all duration-300 shadow-2xl">
       
       <div className="hidden lg:flex items-center gap-3 px-2 py-3 border-b border-white/5 mb-6 cursor-pointer" onClick={() => navigate('/dashboard')}>
@@ -64,7 +65,6 @@ const Sidebar = () => {
           </div>
         </div>
         
-        {/* FIXED: Directly triggers the global state modal overlay parameter cleanly */}
         <button 
           type="button"
           onClick={() => { setShowLogoutModal(true); }} 
