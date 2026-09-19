@@ -17,9 +17,18 @@ const TaskCard = ({ task, onToggleStatus }) => {
 
   const isCompleted = task.status && task.status.toLowerCase().trim() === 'completed';
 
-  const handleConfirmDelete = async () => {
+    const handleConfirmDelete = async () => {
     setIsDeleting(true);
-    await deleteExistingTask(task.id);
+    
+    // FIXED ID BOUNDARY MAP: Safely checks all case variants to ensure the true task integer is sent
+    const targetTaskId = task.id || task.Id || task.task_id;
+    
+    if (targetTaskId) {
+      await deleteExistingTask(targetTaskId);
+    } else {
+      console.error("Critical: Task unique primary key id trace missing from record array mapping.", task);
+    }
+    
     setIsDeleting(false);
     setShowDeleteModal(false); // Close the overlay cleanly on completion
   };
