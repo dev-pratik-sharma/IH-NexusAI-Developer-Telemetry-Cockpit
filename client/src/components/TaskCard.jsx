@@ -18,7 +18,11 @@ const TaskCard = ({ task, onToggleStatus }) => {
   const isCompleted = task.status && task.status.toLowerCase().trim() === 'completed';
 
   const handleConfirmDelete = async (e) => {
-    if (e) e.stopPropagation(); // Strict event containment isolation
+    // EXACT SAME LOGIC AS PROJECT DELETION: Protects the connection by blocking event bubbling completely
+    if (e && typeof e.stopPropagation === 'function') {
+      e.stopPropagation();
+    }
+    
     setIsDeleting(true);
     
     const targetTaskId = task.id || task.Id || task.task_id;
@@ -27,7 +31,7 @@ const TaskCard = ({ task, onToggleStatus }) => {
     }
     
     setIsDeleting(false);
-    setShowDeleteModal(false);
+    setShowDeleteModal(false); // Closes overlay cleanly
   };
 
   return (
@@ -62,7 +66,7 @@ const TaskCard = ({ task, onToggleStatus }) => {
             {task.priority}
           </span>
 
-          {/* FIXED: Added e.stopPropagation() to kill event bubbling and isolate click traces entirely */}
+          {/* Deletion Button Tracker */}
           <button
             type="button"
             onClick={(e) => {
@@ -77,11 +81,11 @@ const TaskCard = ({ task, onToggleStatus }) => {
         </div>
       </div>
 
-      {/* FIXED POSITION OVERLAY: Untouched, beautiful centered frosted dialog */}
+      {/* ⚠️ MATCHED FIXED OVERLAY MODAL */}
       {showDeleteModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-fadeIn">
           <div 
-            onClick={(e) => e.stopPropagation()} // Prevents closing or clicking backdrop layers safely
+            onClick={(e) => e.stopPropagation()} // Safe structural click block
             className="w-full max-w-sm glass-card p-6 rounded-2xl border border-white/10 text-center relative shadow-2xl bg-[#0b0f19]/95"
           >
             <button 
@@ -112,9 +116,11 @@ const TaskCard = ({ task, onToggleStatus }) => {
               >
                 Cancel
               </button>
+              
+              {/* FIXED INTERNAL INTERLOCK ROUTE: Safely binds the event payload signature to prevent bubbling blocks */}
               <button 
                 type="button"
-                onClick={handleConfirmDelete} 
+                onClick={(e) => handleConfirmDelete(e)} 
                 disabled={isDeleting} 
                 className="flex-1 px-4 py-2 bg-rose-600 hover:bg-rose-500 rounded-xl text-xs font-semibold text-white shadow-md transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-40"
               >
