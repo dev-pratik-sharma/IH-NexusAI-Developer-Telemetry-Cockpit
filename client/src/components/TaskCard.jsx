@@ -17,24 +17,20 @@ const TaskCard = ({ task, onToggleStatus }) => {
 
   const isCompleted = task.status && task.status.toLowerCase().trim() === 'completed';
 
-    const handleConfirmDelete = async () => {
+  const handleConfirmDelete = async (e) => {
+    if (e) e.stopPropagation(); // Strict event containment isolation
     setIsDeleting(true);
     
-    // FIXED ID BOUNDARY MAP: Safely checks all case variants to ensure the true task integer is sent
     const targetTaskId = task.id || task.Id || task.task_id;
-    
     if (targetTaskId) {
       await deleteExistingTask(targetTaskId);
-    } else {
-      console.error("Critical: Task unique primary key id trace missing from record array mapping.", task);
     }
     
     setIsDeleting(false);
-    setShowDeleteModal(false); // Close the overlay cleanly on completion
+    setShowDeleteModal(false);
   };
 
   return (
-    // React Fragment wraps both layers so the modal is structurally independent from the opacity fade
     <>
       <div className={`p-3.5 rounded-xl border transition-all duration-300 flex items-center justify-between gap-3 ${
         isCompleted 
@@ -44,6 +40,7 @@ const TaskCard = ({ task, onToggleStatus }) => {
         
         <div className="flex items-center gap-3 flex-1 min-w-0 text-left">
           <button 
+            type="button"
             onClick={onToggleStatus}
             className="text-slate-500 hover:text-indigo-400 transition-colors cursor-pointer shrink-0"
           >
@@ -65,12 +62,12 @@ const TaskCard = ({ task, onToggleStatus }) => {
             {task.priority}
           </span>
 
-          {/* Task Deletion Button Trash Can Icon */}
+          {/* FIXED: Added e.stopPropagation() to kill event bubbling and isolate click traces entirely */}
           <button
             type="button"
             onClick={(e) => {
-              e.stopPropagation();
-              setShowDeleteModal(true); // Triggers the clean internal frosted overlay modal instantly
+              e.stopPropagation(); // Stops toggleStatus from running concurrently
+              setShowDeleteModal(true); 
             }}
             className="p-1 rounded-lg text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 border border-transparent hover:border-rose-500/20 transition-all cursor-pointer"
             title="Destroy Task Record"
@@ -80,13 +77,19 @@ const TaskCard = ({ task, onToggleStatus }) => {
         </div>
       </div>
 
-      {/* ⚠️ FIXED POSITION OVERLAY: Sitting outside the card to completely bypass any parent opacity-60 restrictions */}
+      {/* FIXED POSITION OVERLAY: Untouched, beautiful centered frosted dialog */}
       {showDeleteModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-fadeIn">
-          <div className="w-full max-w-sm glass-card p-6 rounded-2xl border border-white/10 text-center relative shadow-2xl bg-[#0b0f19]/95">
+          <div 
+            onClick={(e) => e.stopPropagation()} // Prevents closing or clicking backdrop layers safely
+            className="w-full max-w-sm glass-card p-6 rounded-2xl border border-white/10 text-center relative shadow-2xl bg-[#0b0f19]/95"
+          >
             <button 
               type="button"
-              onClick={() => setShowDeleteModal(false)} 
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowDeleteModal(false);
+              }} 
               className="absolute top-4 right-4 text-slate-500 hover:text-slate-300 transition-colors cursor-pointer"
             >
               <X size={16} />
@@ -101,7 +104,10 @@ const TaskCard = ({ task, onToggleStatus }) => {
             <div className="flex gap-2">
               <button 
                 type="button"
-                onClick={() => setShowDeleteModal(false)} 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowDeleteModal(false);
+                }} 
                 className="flex-1 px-4 py-2 bg-white/5 border border-white/5 hover:bg-white/10 rounded-xl text-xs font-semibold text-slate-300 transition-all cursor-pointer"
               >
                 Cancel
