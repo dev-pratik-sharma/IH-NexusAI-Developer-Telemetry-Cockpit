@@ -20,7 +20,11 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Global Middleware Configuration
-app.use(cors());
+app.use(cors({
+  origin: '*', // Allows your live Vercel frontend address domain to query data lanes smoothly
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // 🚀 FIXED: Explicitly added DELETE to prevent Render header blocks
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(express.json());
 
 // API Module Endpoint Interlocking
