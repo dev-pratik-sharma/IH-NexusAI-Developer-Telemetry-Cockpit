@@ -21,7 +21,7 @@ export const AppProvider = ({ children }) => {
   const [tasks, setTasks] = useState([]);
   const [isLoading, setIsLoading] = useState(true); // Default loading locks screen until auth verify completes
 
-  const API_BASE = 'http://localhost:5000/api';
+  const API_BASE = 'https://ih-nexusai-developer-telemetry-cockpit.onrender.com/api';
 
   const modernGradients = [
     'from-indigo-500 to-purple-600',
